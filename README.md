@@ -43,7 +43,7 @@ This model identifies the maturity level of tomatoes using **MobileNet**.
 
 ### 4. Apple Disease Detection
 
-This model identifies diseases affecting apple leaves using **MobileNet**.
+This model identifies diseases affecting apple leaves using **EfficientNet**.
 
 ### 5. Tomato Disease Detection
 
@@ -57,7 +57,7 @@ This model identifies diseases affecting tomato leaves using **MobileNet**.
 | Apple & Tomato Classification  | MobileNet    |
 | Apple Maturity Classification  | EfficientNet |
 | Tomato Maturity Classification | MobileNet    |
-| Apple Disease Classification   | MobileNet    |
+| Apple Disease Classification   | EfficientNet |
 | Tomato Disease Classification  | MobileNet    |
 
 ## Datasets
