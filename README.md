@@ -1,99 +1,123 @@
-# Tomato Leaf Disease Classification — MobileNetV2
+# Smart Precision Agriculture
 
-Image classification pipeline that identifies tomato leaf diseases from a photo and returns a treatment recommendation. Built with TensorFlow/Keras using transfer learning on MobileNetV2.
+## About the Project
 
-## Overview
+Smart Precision Agriculture is a computer vision-based system designed to analyze apple and tomato plants using deep learning models.
 
-- **Task**: Multi-class image classification of tomato leaf diseases (8 classes)
-- **Backbone**: MobileNetV2 (ImageNet weights), fine-tuned in two stages
-- **Input size**: 224×224 RGB
-- **Extra**: A rule-based treatment recommendation engine maps each predicted class to severity, urgency, and organic/chemical treatment guidance
+The system identifies whether the detected fruit is an apple or tomato, estimates fruit maturity, and detects diseases affecting the leaves.
 
-## Classes
+The project combines object detection and image classification models and provides a Streamlit interface for deployment.
 
-| Index | Class |
-|---|---|
-| 0 | Tomato_Bacterial_spot |
-| 1 | Tomato_Leaf_Mold |
-| 2 | Tomato_Septoria_leaf_spot |
-| 3 | Tomato_Spider_mites_Two_spotted_spider_mite |
-| 4 | Tomato__Target_Spot |
-| 5 | Tomato__Tomato_YellowLeaf__Curl_Virus |
-| 6 | Tomato__Tomato_mosaic_virus |
-| 7 | Tomato_healthy |
+## Project Objectives
 
-The mapping is saved to `class_indices.json` during preprocessing and reused at inference time.
+* Detect and classify apples and tomatoes.
+* Estimate the maturity level of apples and tomatoes.
+* Detect diseases affecting apple leaves.
+* Detect diseases affecting tomato leaves.
+* Integrate the trained models into a Streamlit application.
 
-## Dataset & Preprocessing
+## System Overview
 
-- Source folder: `final-tomato-dataset/grad project` (Kaggle dataset)
-- Split into train/val/test (**70/15/15**) with `split-folders`, fixed seed (42)
-- `ImageDataGenerator` for augmentation on the training set: rotation, width/height shift, zoom, horizontal flip, brightness jitter
-- All splits preprocessed with MobileNetV2's `preprocess_input`
+The project consists of five main computer vision tasks:
 
-Resulting split sizes: 9,167 train / 1,961 val / 1,974 test images.
+### 1. Apple & Tomato Detection and Classification
 
-## Model
+This part detects the fruit and identifies whether it is an apple or tomato.
 
-```
-Input (224, 224, 3)
-  → MobileNetV2 base (ImageNet weights)
-  → GlobalAveragePooling2D
-  → Dropout(0.3)
-  → Dense(128, relu)
-  → Dropout(0.2)
-  → Dense(num_classes, softmax)
-```
+* **YOLO** is used for object detection.
+* **MobileNet** is used for classification.
 
-## Training (two stages)
+### 2. Apple Maturity
 
-**Stage 1 — head only**
-- Base frozen, classifier head trained from scratch
-- Optimizer: Adam (lr = 1e-3), loss: categorical cross-entropy
-- Up to 30 epochs, `EarlyStopping` (patience 7, restore best weights), `ModelCheckpoint` on `val_accuracy`
-- Saved: `mobilenetv2_stage1_best.keras`, `mobilenetv2_stage1_final.keras`
+This model classifies apples into three maturity levels:
 
-**Stage 2 — fine-tuning**
-- Last ~30 layers of the base unfrozen, rest stay frozen
-- Optimizer: Adam (lr = 1e-5) — low LR to avoid destroying pretrained features
-- Up to 20 epochs, same early stopping / checkpoint setup
-- Saved: `mobilenetv2_finetuned_best.keras`, `mobilenetv2_finetuned_final.keras`
+* Unripe
+* Semi-ripe
+* Ripe
 
-## Evaluation
+**EfficientNet** is used for apple maturity classification, while **YOLO** is used for apple detection and annotation.
 
-- `classification_report` (precision/recall/F1 per class) on the test split
-- Confusion matrix plotted with seaborn
+### 3. Tomato Maturity
 
-## Treatment Recommendation Engine
+This model identifies the maturity level of tomatoes using **MobileNet**.
 
-A small rule-based module (`TreatmentInfo` dataclass + `TREATMENT_DB`) that, for each disease class, returns:
-- Severity (`low` / `medium` / `high`)
-- Urgency note (how fast to act)
-- Immediate actions
-- Organic treatment options
-- Chemical treatment options
-- Prevention tips
+### 4. Apple Disease Detection
 
-> Output is general agricultural guidance based on common practice, not a substitute for a local agricultural extension officer/agronomist — worth surfacing that disclaimer in any app UI built on top of this.
+This model identifies diseases affecting apple leaves using **EfficientNet**.
 
-## Requirements
+### 5. Tomato Disease Detection
 
-```
-tensorflow
-split-folders
-numpy
-scikit-learn
-seaborn
-matplotlib
-ipywidgets
-```
+This model identifies diseases affecting tomato leaves using **MobileNet**.
 
-## Project Structure (outputs)
+## Models
 
-```
-class_indices.json                    # index -> class name mapping
-mobilenetv2_stage1_best.keras         # best head-only checkpoint
-mobilenetv2_stage1_final.keras        # final head-only model
-mobilenetv2_finetuned_best.keras      # best fine-tuned checkpoint
-mobilenetv2_finetuned_final.keras     # final fine-tuned model
-```
+| Task                           | Model        |
+| ------------------------------ | ------------ |
+| Apple & Tomato Detection       | YOLO         |
+| Apple & Tomato Classification  | MobileNet    |
+| Apple Maturity Classification  | EfficientNet |
+| Tomato Maturity Classification | MobileNet    |
+| Apple Disease Classification   | EfficientNet |
+| Tomato Disease Classification  | MobileNet    |
+
+## Datasets
+
+### Apple & Tomato Detection and Classification
+
+Dataset information will be added later.
+
+### Apple Maturity
+
+The [AppleGrowthVision](https://datacloud.hhi.fraunhofer.de/s/KLFXDw9cWSzXk95?dir=/brandenburg) dataset was used for apple maturity classification.
+
+Three folders were selected based on their acquisition dates:
+
+* `2022-06-27` → Unripe
+* `2022-08-03` → Semi-ripe
+* `2022-09-06` → Ripe
+
+Apple detection annotations were prepared using Roboflow.
+
+[Apple Detection Annotations – Roboflow](https://app.roboflow.com/hager-hamoda/apple-detection-with-annotation/browse)
+
+### Tomato Maturity
+
+[Tomato Ripness Dataset – Roboflow Universe](https://universe.roboflow.com/postwork/tomato-ripness/browse)
+
+### Tomato Diseases
+
+[Tomato Balanced Dataset – Kaggle]([https://www.kaggle.com/datasets/ghadagsme/tomato-balanced-dataset](https://www.kaggle.com/datasets/ghadagsme/final-tomato-dataset))
+
+### Apple Diseases
+
+[Plant Pathology 2021 – FGVC8 – Kaggle](https://www.kaggle.com/c/plant-pathology-2021-fgvc8)
+
+## Technologies
+
+* Python
+* YOLO
+* MobileNet
+* EfficientNet
+* Streamlit
+* Roboflow
+* Kaggle
+
+## Deployment
+
+The trained models are integrated into a Streamlit application that provides an interface for running the computer vision models and displaying their predictions.
+
+## Team
+
+| Member        | Responsibility                              |
+| ------------- | ------------------------------------------- |
+| Shahd Abdelhy | Apple & Tomato Detection and Classification |
+| Mariam Bahi   | Tomato Maturity                             |
+| Hager Ahmed   | Apple Maturity                              |
+| Ghada Saeed   | Tomato Disease Detection                    |
+| Muhammed Diab | Apple Disease Detection                     |
+
+## Future Improvements
+
+* Improve model performance with additional training data.
+* Add support for more plant and disease classes.
+* Improve the Streamlit interface.
