@@ -86,7 +86,7 @@ Apple detection annotations were prepared using Roboflow.
 
 ### Tomato Diseases
 
-[Tomato Balanced Dataset – Kaggle](https://www.kaggle.com/datasets/ghadagsme/tomato-balanced-dataset)
+[Tomato Balanced Dataset – Kaggle]([https://www.kaggle.com/datasets/ghadagsme/tomato-balanced-dataset](https://www.kaggle.com/datasets/ghadagsme/final-tomato-dataset))
 
 ### Apple Diseases
 
