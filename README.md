@@ -64,23 +64,6 @@ Input (224, 224, 3)
 - `classification_report` (precision/recall/F1 per class) on the test split
 - Confusion matrix plotted with seaborn
 
-## Inference
-
-```python
-model = load_trained_model("mobilenetv2_stage1_best.keras")
-predicted_class, confidence = predict_image(model, image_path)
-recommendation = get_recommendation(predicted_class, confidence)
-```
-
-`predict_image` resizes the image to 224×224, applies `preprocess_input`, and returns the top class + confidence.
-
-Confidence thresholds used by `get_recommendation`:
-- `< 0.60` → low confidence, asks for a clearer photo instead of a recommendation
-- `0.60 – 0.85` → recommendation returned, flagged as moderate confidence
-- `≥ 0.85` → recommendation returned, flagged as high confidence
-
-An `ipywidgets` file uploader cell is included for interactive testing inside the notebook.
-
 ## Treatment Recommendation Engine
 
 A small rule-based module (`TreatmentInfo` dataclass + `TREATMENT_DB`) that, for each disease class, returns:
