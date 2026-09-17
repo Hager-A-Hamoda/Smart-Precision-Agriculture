@@ -3,6 +3,7 @@ from pathlib import Path
 from functools import lru_cache
 
 import gradio as gr
+import spaces
 import numpy as np
 from PIL import Image, ImageDraw
 import tensorflow as tf
@@ -143,6 +144,7 @@ def load_tomato_disease():
 # 1. Apple / Tomato classification
 # ------------------------------------------------------------
 
+@spaces.GPU(duration=60)
 def classifier_predict(image):
     """
     Run the Apple/Tomato classifier.
@@ -480,6 +482,7 @@ def tomato_maturity_predict(image):
 # 5. Maturity workflow
 # ------------------------------------------------------------
 
+@spaces.GPU(duration=120)
 def run_maturity(
     fruit_image,
     fruit,
@@ -633,6 +636,7 @@ def keras_classifier_predict(
     return label, confidence
 
 
+@spaces.GPU(duration=120)
 def run_disease(
     leaf_image,
     fruit,
