@@ -1,3 +1,13 @@
+---
+title: Smart Precision Agriculture
+emoji: 🌱
+colorFrom: green
+colorTo: blue
+sdk: gradio
+app_file: app.py
+pinned: false
+---
+
 # Smart Precision Agriculture
 
 ## About the Project
