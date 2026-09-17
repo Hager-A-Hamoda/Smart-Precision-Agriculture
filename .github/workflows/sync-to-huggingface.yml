@@ -8,11 +8,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  sync:
+  sync-to-huggingface:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout GitHub repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
@@ -22,25 +22,24 @@ jobs:
         run: |
           git lfs install
 
-      - name: Download LFS files
+      - name: Pull LFS files
         run: |
           git lfs pull
-          git lfs checkout
 
-      - name: Verify model file
+      - name: Verify LFS
         run: |
-          echo "Checking best_model FF.keras..."
+          git lfs fsck
           ls -lh "best_model FF.keras"
-          echo "File size:"
-          stat -c%s "best_model FF.keras"
-          echo "First bytes:"
-          head -c 20 "best_model FF.keras" | xxd
 
-      - name: Sync to Hugging Face Space
-        uses: huggingface/hub-sync@v0.3.0
-        with:
-          github_repo_id: ${{ github.repository }}
-          huggingface_repo_id: shahd-ai/smart-precision-agriculture
-          hf_token: ${{ secrets.HF_TOKEN }}
-          repo_type: space
-          space_sdk: gradio
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git push --force \
+            https://shahd-ai:${HF_TOKEN}@huggingface.co/spaces/shahd-ai/smart-precision-agriculture \
+            main
