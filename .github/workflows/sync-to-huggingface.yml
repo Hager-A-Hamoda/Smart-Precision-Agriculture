@@ -18,18 +18,26 @@ jobs:
           fetch-depth: 0
           lfs: true
 
-      - name: Pull LFS files
+      - name: Install Git LFS
         run: |
           git lfs install
-          git lfs pull
 
-      - name: Verify LFS model
+      - name: Download LFS files
         run: |
+          git lfs pull
+          git lfs checkout
+
+      - name: Verify model file
+        run: |
+          echo "Checking best_model FF.keras..."
           ls -lh "best_model FF.keras"
-          file "best_model FF.keras"
+          echo "File size:"
+          stat -c%s "best_model FF.keras"
+          echo "First bytes:"
+          head -c 20 "best_model FF.keras" | xxd
 
       - name: Sync to Hugging Face Space
-        uses: huggingface/hub-sync@v0.1.0
+        uses: huggingface/hub-sync@v0.3.0
         with:
           github_repo_id: ${{ github.repository }}
           huggingface_repo_id: shahd-ai/smart-precision-agriculture
