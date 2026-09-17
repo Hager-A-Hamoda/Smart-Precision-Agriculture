@@ -1,3 +1,13 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:a2536bee539103005aef165d6bbc7eca03fbb9d016c97ff860eff51d5a871fda
-size 397
+{
+  "model_file": "tomato_maturity_best.pt",
+  "task": "detection",
+  "classes": {
+    "0": "unripe",
+    "1": "half_ripe",
+    "2": "ripe"
+  },
+  "input_size": 960,
+  "recommended_conf_threshold": 0.4,
+  "recommended_iou_threshold": 0.7,
+  "notes": "YOLOv8n fine-tuned on merged 3-class tomato ripeness (unripe/half_ripe/ripe). Known limitation: recall ~0.48-0.49 on occluded/clustered fruit."
+}
