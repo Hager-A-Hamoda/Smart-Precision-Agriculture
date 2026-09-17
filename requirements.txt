@@ -1,4 +1,1 @@
-tensorflow-cpu==2.20.0
-ultralytics
-Pillow
-numpy
+gradio
