@@ -13,24 +13,30 @@ original `app.py` so predictions line up with how the models were trained/used.)
 
 ## 1. Folder layout
 
-Put the two `.keras` files in a `models/` folder next to `streamlit_app.py`:
+`app.py` is set up for your current layout, where the app lives
+in a `disease_app/` subfolder one level below the repo root:
 
 ```
-your-folder/
-├── streamlit_app.py
-├── requirements.txt
-├── README.md
-└── models/
-    ├── best_model FF.keras
-    └── mobilenetv2_stage1_best.keras
+Smart-Precision-Agriculture/          <- repo root
+├── disease_app/
+│   ├── app.py              <- this app
+│   ├── DiseaseAppRequirements.txt
+│   └── readme.md
+├── best_model FF.keras               <- already in repo (apple disease model)
+└── tomatoDisease/
+    └── mobilenetv2_stage1_best.keras <- already in repo (tomato disease model)
 ```
 
-You can download the models from the GitHub repo:
-- `best_model FF.keras` (repo root)
-- `tomatoDisease/mobilenetv2_stage1_best.keras`
+The paths are simple relative strings resolved against the repo root
+(`disease_app/`'s parent folder):
 
-Just place both files inside `models/` (keep the exact filenames, including
-the space in "best_model FF.keras").
+```python
+APPLE_DISEASE_PATH = "best_model FF.keras"
+TOMATO_DISEASE_PATH = r"tomatoDisease\mobilenetv2_stage1_best.keras"
+```
+
+If for some reason a model isn't found at that exact spot, the app falls
+back to searching the rest of the repo for a file with the same name.
 
 ## 2. Install dependencies
 
@@ -39,7 +45,7 @@ It's recommended to use a virtual environment.
 ```bash
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r disease_app\DiseaseAppRequirements.txt
 ```
 
 ### Python 3.13 note
@@ -64,7 +70,8 @@ You do **not** need to switch to Python 3.11 for this app.
 ## 3. Run the app
 
 ```bash
-streamlit run streamlit_app.py
+cd disease_app
+streamlit run app.py
 ```
 
 This opens the app at `http://localhost:8501`.

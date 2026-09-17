@@ -3,8 +3,11 @@ Smart Precision Agriculture - Leaf Disease Classifier (Streamlit)
 ==================================================================
 Deploys ONLY the two disease-classification models from the project:
 
-  - Apple Leaf Disease   -> models/best_model FF.keras
-  - Tomato Leaf Disease  -> models/mobilenetv2_stage1_best.keras
+  - Apple Leaf Disease   -> best_model FF.keras
+  - Tomato Leaf Disease  -> tomatoDisease\mobilenetv2_stage1_best.keras
+
+This file is expected to live in disease_app/, one level below the repo
+root where the two model files above actually sit.
 
 Run with:
     streamlit run streamlit_app.py
@@ -23,10 +26,13 @@ from tensorflow import keras
 # Config
 # ------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parent
-MODELS_DIR = ROOT / "models"
+# app.py lives in disease_app/, one level below the repo root where the
+# model files actually are.
+REPO_ROOT = ROOT.parent
 
-APPLE_DISEASE_FILENAME = "best_model FF.keras"
-TOMATO_DISEASE_FILENAME = "mobilenetv2_stage1_best.keras"
+# Paths exactly as they sit inside the repo (relative to the repo root).
+APPLE_DISEASE_PATH = "best_model FF.keras"
+TOMATO_DISEASE_PATH = r"tomatoDisease\mobilenetv2_stage1_best.keras"
 
 # Class order matches the original project's app.py exactly.
 APPLE_DISEASE_CLASSES = [
@@ -53,31 +59,33 @@ st.set_page_config(
 # ------------------------------------------------------------------
 # Helpers
 # ------------------------------------------------------------------
-def find_model(filename: str) -> Path:
-    """Look for the model file in models/, then in the app root, as a fallback."""
-    candidates = [MODELS_DIR / filename, ROOT / filename]
-    for c in candidates:
-        if c.exists():
-            return c
-    # last resort: search recursively
-    matches = list(ROOT.rglob(filename))
+def find_model(relative_path: str) -> Path:
+    """Resolve a model path relative to the repo root (one level above
+    disease_app/). Falls back to a recursive search under the repo root by
+    filename if it isn't found at the expected spot."""
+    path = REPO_ROOT / relative_path
+    if path.exists():
+        return path
+    filename = Path(relative_path).name
+    matches = list(REPO_ROOT.rglob(filename))
     if matches:
         return matches[0]
     raise FileNotFoundError(
-        f"Could not find '{filename}'. Place it in a 'models/' folder "
-        f"next to streamlit_app.py."
+        f"Could not find '{filename}' at the expected path '{path}'. "
+        f"Make sure disease_app/ sits directly inside the repo root, next "
+        f"to 'best_model FF.keras' and the 'tomatoDisease/' folder."
     )
 
 
 @st.cache_resource(show_spinner=False)
 def load_apple_disease_model():
-    path = find_model(APPLE_DISEASE_FILENAME)
+    path = find_model(APPLE_DISEASE_PATH)
     return keras.models.load_model(path, compile=False)
 
 
 @st.cache_resource(show_spinner=False)
 def load_tomato_disease_model():
-    path = find_model(TOMATO_DISEASE_FILENAME)
+    path = find_model(TOMATO_DISEASE_PATH)
     return keras.models.load_model(path, compile=False)
 
 
@@ -202,7 +210,8 @@ with st.sidebar:
     st.write(", ".join(TOMATO_DISEASE_CLASSES))
     st.divider()
     st.caption(
-        "Model files are expected at:\n\n"
-        "`models/best_model FF.keras`\n\n"
-        "`models/mobilenetv2_stage1_best.keras`"
+        "Model files are expected at (relative to the repo root, one "
+        "level above this app):\n\n"
+        "`best_model FF.keras`\n\n"
+        "`tomatoDisease\\mobilenetv2_stage1_best.keras`"
     )
