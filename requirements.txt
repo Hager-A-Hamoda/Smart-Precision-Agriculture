@@ -1,2 +1,4 @@
+tensorflow-cpu==2.20.0
 gradio
 spaces
+numpy
