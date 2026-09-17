@@ -1,26 +1,32 @@
 import gradio as gr
 import spaces
-import tensorflow as tf
-from ultralytics import YOLO
 
 @spaces.GPU
-def combined_test():
-    # Import and execute a tiny operation from both libraries.
+def tensorflow_lazy_test():
+    import tensorflow as tf
     x = tf.constant([[1.0, 2.0], [3.0, 4.0]])
     y = tf.matmul(x, x)
+    return f"✅ TensorFlow lazy import works: {y.numpy().tolist()}"
 
-    # Do not load any project weights.
-    # Importing YOLO confirms the Ultralytics side is available.
-    _ = YOLO
+@spaces.GPU
+def ultralytics_lazy_test():
+    from ultralytics import YOLO
+    return "✅ Ultralytics lazy import works."
 
-    return f"✅ TensorFlow + Ultralytics work together. TensorFlow result: {y.numpy().tolist()}"
+with gr.Blocks(title="Lazy Import ZeroGPU Test") as demo:
+    gr.Markdown("# 🧪 Lazy Import ZeroGPU Test")
+    gr.Markdown(
+        "TensorFlow and Ultralytics are NOT imported at startup. "
+        "Each is imported only inside its own @spaces.GPU function."
+    )
 
-with gr.Blocks(title="TensorFlow + Ultralytics ZeroGPU Test") as demo:
-    gr.Markdown("# 🧪 TensorFlow + Ultralytics + ZeroGPU Test")
-    gr.Markdown("No project models or weights are loaded in this test.")
-    btn = gr.Button("Test Both Libraries", variant="primary")
-    result = gr.Markdown("Waiting for test...")
-    btn.click(fn=combined_test, inputs=[], outputs=result)
+    tf_btn = gr.Button("Test TensorFlow", variant="primary")
+    tf_result = gr.Markdown("TensorFlow test not run.")
+    tf_btn.click(fn=tensorflow_lazy_test, inputs=[], outputs=tf_result)
+
+    yolo_btn = gr.Button("Test Ultralytics", variant="primary")
+    yolo_result = gr.Markdown("Ultralytics test not run.")
+    yolo_btn.click(fn=ultralytics_lazy_test, inputs=[], outputs=yolo_result)
 
 if __name__ == "__main__":
     demo.launch()
