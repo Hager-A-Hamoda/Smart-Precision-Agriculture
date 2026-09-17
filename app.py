@@ -1,14 +1,16 @@
 import gradio as gr
+import spaces
 
-def health_check():
-    return "✅ Gradio/ZeroGPU startup test passed. No TensorFlow or Ultralytics is loaded."
+@spaces.GPU
+def gpu_test():
+    return "✅ ZeroGPU + @spaces.GPU is working."
 
-with gr.Blocks(title="Smart Precision Agriculture - Startup Test") as demo:
-    gr.Markdown("# 🌱 Smart Precision Agriculture")
-    gr.Markdown("## ZeroGPU startup diagnostic")
-    test_btn = gr.Button("Run Startup Test", variant="primary")
-    result = gr.Markdown("Click the button to test the Gradio runtime.")
-    test_btn.click(fn=health_check, inputs=[], outputs=result)
+with gr.Blocks(title="Smart Precision Agriculture - ZeroGPU Test") as demo:
+    gr.Markdown("# 🌱 ZeroGPU Diagnostic Test")
+    gr.Markdown("This test loads only Gradio + spaces.")
+    btn = gr.Button("Test ZeroGPU", variant="primary")
+    result = gr.Markdown("Waiting for test...")
+    btn.click(fn=gpu_test, inputs=[], outputs=result)
 
 if __name__ == "__main__":
     demo.launch()
