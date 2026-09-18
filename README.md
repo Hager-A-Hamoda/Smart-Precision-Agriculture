@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 ---
 title: Smart Precision Agriculture
 emoji: 🌱
@@ -8,6 +10,7 @@ app_file: app.py
 pinned: false
 ---
 
+>>>>>>> origin/main
 # Smart Precision Agriculture
 
 ## About the Project
@@ -92,7 +95,7 @@ Apple detection annotations were prepared using Roboflow.
 
 ### Tomato Maturity
 
-[Tomato Ripness Dataset – Roboflow Universe](https://universe.roboflow.com/postwork/tomato-ripness/browse)
+[Tomato Ripness Dataset – Roboflow Universe](https://universe.roboflow.com/postwork/tomato-ripness/dataset/2)
 
 ### Tomato Diseases
 

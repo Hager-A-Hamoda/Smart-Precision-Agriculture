@@ -1,6 +1,6 @@
-tensorflow-cpu==2.15.1
+streamlit>=1.32
+tensorflow>=2.21
 ultralytics
-gradio
-spaces
 numpy
 Pillow
+tf_keras
