@@ -446,21 +446,92 @@ def preprocess_for(
 # ============================================================
 @st.cache_resource
 def load_keras_model(path_str: str):
+    """Load a Keras model with compatibility handling for older .keras files.
+
+    Some disease .keras files were saved with a Keras version that writes
+    newer layer config fields (for example ``quantization_config``).  Older
+    Keras runtimes then fail while rebuilding Dense/Functional layers even
+    though the actual model weights are valid.
+
+    Loading with ``compile=False`` is enough for inference in this app. If
+    that still fails, we make a temporary copy of the .keras archive and
+    remove only unsupported ``quantization_config`` entries from config.json.
+    The original model file is never modified.
+    """
+    path = Path(path_str)
+    if not path.exists():
+        raise FileNotFoundError(f"Model file not found: {path}")
+
+    errors = []
+
+    # 1) Normal Keras 3 loading, without optimizer/loss deserialization.
     try:
-        return tf.keras.models.load_model(path_str)
+        return tf.keras.models.load_model(
+            str(path),
+            compile=False,
+            safe_mode=False,
+        )
     except Exception as e:
-        # Fallback for models saved with legacy/old Keras that tf.keras
-        # (Keras 3) can't deserialize directly. This only kicks in when
-        # the normal load fails, so it never affects models that load fine.
+        errors.append(f"Keras load: {e}")
+
+    # 2) Compatibility repair for .keras archives.
+    #    The model architecture/weights stay untouched; only unsupported
+    #    serialization metadata is removed from a temporary copy.
+    if path.suffix.lower() == ".keras":
         try:
-            import tf_keras
-            return tf_keras.models.load_model(path_str)
-        except Exception as fallback_error:
-            raise RuntimeError(
-                f"Failed to load the model with both methods.\n"
-                f"Primary error: {e}\n"
-                f"tf_keras error: {fallback_error}"
-            )
+            import json
+            import tempfile
+            import zipfile
+
+            def strip_unsupported_config(obj):
+                if isinstance(obj, dict):
+                    obj.pop("quantization_config", None)
+                    return {
+                        key: strip_unsupported_config(value)
+                        for key, value in obj.items()
+                    }
+                if isinstance(obj, list):
+                    return [strip_unsupported_config(value) for value in obj]
+                return obj
+
+            with zipfile.ZipFile(path, "r") as src_zip:
+                with tempfile.TemporaryDirectory() as tmp_dir:
+                    patched_path = Path(tmp_dir) / path.name
+
+                    with zipfile.ZipFile(
+                        patched_path, "w", compression=zipfile.ZIP_DEFLATED
+                    ) as dst_zip:
+                        for item in src_zip.infolist():
+                            data = src_zip.read(item.filename)
+
+                            if item.filename == "config.json":
+                                config = json.loads(data.decode("utf-8"))
+                                config = strip_unsupported_config(config)
+                                data = json.dumps(
+                                    config, separators=(",", ":")
+                                ).encode("utf-8")
+
+                            dst_zip.writestr(item, data)
+
+                    return tf.keras.models.load_model(
+                        str(patched_path),
+                        compile=False,
+                        safe_mode=False,
+                    )
+        except Exception as e:
+            errors.append(f"Compatibility-patched Keras load: {e}")
+
+    # 3) Legacy tf-keras fallback, if installed.
+    try:
+        import tf_keras
+        return tf_keras.models.load_model(str(path), compile=False)
+    except Exception as e:
+        errors.append(f"tf_keras load: {e}")
+
+    raise RuntimeError(
+        "Failed to load the Keras model for inference.\n\n"
+        + "\n\n".join(errors)
+    )
 
 @st.cache_resource
 def load_yolo_model(path_str: str):
